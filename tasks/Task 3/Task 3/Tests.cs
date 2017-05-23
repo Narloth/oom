@@ -38,6 +38,15 @@ namespace Task_3
             });
         }
 
+        [Test]
+        public void fail_createProject()
+        {
+            Assert.Catch(() => 
+            { var g = new Foodstuff("", 3M, "");
+            });
+
+        }
+
 
     }
 

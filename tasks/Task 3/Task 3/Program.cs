@@ -41,7 +41,7 @@ namespace Task_3
             get { return name; }
             set
             {
-                if (name == "" || name.Length == 0) throw new ArgumentOutOfRangeException("A name has to be assigned");
+                if (name.Equals("")) throw new ArgumentOutOfRangeException("A name has to be assigned");
                 name = value;
             }
         }
