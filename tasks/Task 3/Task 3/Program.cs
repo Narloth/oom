@@ -3,42 +3,55 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
+using NUnit.Framework;
+using System.IO;
+
 
 namespace Task_3
 {
 
     /// <summary>
-    /// an abstract base class containing only abstract methods
+    /// interface: an abstract base class containing only abstract methods
     /// </summary>
     public interface Vat
     {
-        double GetVATPrice(Vat_class rate);
+        void GetVATPrice();
+        void PrintName();
 
     }
 
-    class Product
+    /// <summary>
+    /// abstract base class; cannot be instantiated
+    /// </summary>
+    abstract class Product
     {
+        /// <summary>
+        /// fields
+        /// </summary>
         private string name;
-        private double price;
+        private decimal price;
         private int number;
-        private int quantity;
 
+        /// <summary>
+        /// properties: appear like public fields; have special methods to set / get the property's value
+        /// </summary> 
         public string Name
         {
             get { return name; }
             set
             {
-                if (value == null || value == "") throw new ArgumentOutOfRangeException("A name has to be assigned");
+                if (name == "" || name.Length == 0) throw new ArgumentOutOfRangeException("A name has to be assigned");
                 name = value;
             }
         }
 
-        public double Price
+        public decimal Price
         {
             get { return price; }
             set
             {
-                if (value == 0 || value < 0) throw new ArgumentOutOfRangeException("Price must not be zero or less");
+                if (value <= 0) throw new ArgumentOutOfRangeException("Price must not be negative");
                 price = value;
             }
         }
@@ -48,8 +61,49 @@ namespace Task_3
             get { return number; }
             set
             {
-                if (value == 0) throw new ArgumentOutOfRangeException("An item number has to be assigned");
                 number = value;
+
+            }
+        }
+
+        public Product(string name, decimal price, int number, vat rate)
+        {
+            Name = name;
+            Price = price;
+            Number = number;
+
+        }
+
+        public Product(string name, decimal price)
+        {
+            Name = name;
+            Price = price;
+        }
+
+        public Product() { }
+
+        abstract public void GetQuantity();
+
+    }
+
+    class Beverage : Product, Vat
+    {
+        /// <summary>
+        /// fields
+        /// </summary>
+        private double filling_quantity;
+        private int quantity;
+
+        /// <summary>
+        /// properties
+        /// </summary>
+        public double Filling_Quantity
+        {
+            get { return filling_quantity; }
+            set
+            {
+                if (value < 0) throw new ArgumentOutOfRangeException("Filling quantity has to be greater than zero");
+                filling_quantity = value;
             }
         }
 
@@ -58,56 +112,89 @@ namespace Task_3
             get { return quantity; }
             set
             {
-                if (value == 0 || value < 0) throw new ArgumentOutOfRangeException("Quantity has to be at least 1");
+                if (value < 0) throw new ArgumentOutOfRangeException("No negative quantity allowed!");
                 quantity = value;
             }
         }
 
-    }
-
-    class Beverage : Product, Vat
-    {
-        
-        public Beverage(string newName, double newPrice, int newNumber, int newQuantity, Vat_class rate)
+        /// <summary>
+        /// constructors: special methods used to initialize objects of a class 
+        /// </summary>
+        [JsonConstructor]
+        public Beverage(string name, decimal price, int number, double filling_quantity, vat rate)
+            : base(name, price, number, rate)
         {
-            Name = newName;
-            Price = newPrice;
-            Number = newNumber;
-            Quantity = newQuantity;
+            Filling_Quantity = filling_quantity;
 
         }
-            
 
-        public double GetVATPrice(Vat_class rate)
+        public Beverage(string name, decimal price)
+            : base(name, price) { }
+
+        public Beverage(double filling_quantity, int quantity)
         {
-            rate = Vat_class.first;
-            double total_price = Price + (Price / 100 * 20);
-            return total_price;
+            Quantity = quantity;
         }
-           
+
+        /// <summary>
+        /// methods
+        /// </summary>
+        public void GetVATPrice()
+        {
+            decimal total_price = Price + (Price / 100 * 20);
+            Console.WriteLine("Product: {0}     Price: {1}      Vat rate: {2}       Total price: {3}", Name, Price, vat.first, total_price);
+        }
+
+        public void PrintName()
+        {
+            Console.WriteLine(Name);
+        }
+
+        public override void GetQuantity()
+        {
+            double total_amount = 0;
+            total_amount = Quantity * Filling_Quantity;
+            Console.WriteLine("Total amount:" + total_amount);
+        }
+
     }
 
     class Foodstuff : Product, Vat
     {
 
         private string allergens;
+        private int quantity;
 
-        public Foodstuff (string newName, double newPrice, int newNumber, int newQuantity, string newAllergens, Vat_class rate)
+        [JsonConstructor]
+        public Foodstuff(string name, decimal price, int number, int newQuantity, string newAllergens, vat rate)
+            : base(name, price, number, rate)
         {
-            Name = newName;
-            Price = newPrice;
-            Number = newNumber;
             Quantity = newQuantity;
             Allergens = newAllergens;
         }
 
-
-        public double GetVATPrice(Vat_class rate)
+        public Foodstuff(string name, decimal price, string allergens)
+            : base(name, price)
         {
-            rate = Vat_class.second;
-            double total_price = Price + (Price / 100 * 10);
-            return total_price;
+            Allergens = allergens;
         }
+
+        public Foodstuff(string name, string allergens)
+        {
+            Name = name;
+            Allergens = allergens;
+        }
+
+        public int Quantity
+        {
+            get { return quantity; }
+            set
+            {
+                if (value < 0) throw new ArgumentOutOfRangeException("No negative quantity allowed!");
+                quantity = value;
+            }
+        }
+
 
         public string Allergens
         {
@@ -117,33 +204,33 @@ namespace Task_3
                 allergens = value;
             }
         }
-    }
 
-    class FWine: Product, Vat
-    {
-        public FWine(string newName, double newPrice, int newNumber, int newQuantity, Vat_class rate)
+        public void GetVATPrice()
         {
-            Name = newName;
-            Price = newPrice;
-            Number = newNumber;
-            Quantity = newQuantity;
+            decimal total_price = Price + (Price / 100 * 10);
+            Console.WriteLine("Product: {0}     Price: {1}      Vat rate: {2}       Total price: {3}", Name, Price, vat.second, total_price);
         }
 
-        public double GetVATPrice(Vat_class rate)
+        public void PrintName()
         {
-            rate = Vat_class.third;
-            double total_price = Price + (Price / 100 * 13);
-            return total_price;
+            Console.WriteLine(Name);
+        }
+
+        public override void GetQuantity()
+        {
+            double total_amount = 0;
+            total_amount += Quantity;
+            Console.WriteLine("Total amount:" + total_amount);
         }
     }
 
-    public enum Vat_class
+
+    public enum vat
     {
         first = 20,
 
         second = 10,
 
-        third = 13
     }
 
 
@@ -155,29 +242,47 @@ namespace Task_3
         {
             var myArray = new Vat[]
             {
-            new Beverage("First", 7, 1000, 1, Vat_class.first),
-            new Beverage("Second", 5, 2000, 4, Vat_class.first),
-            new Beverage("Third", 3, 3000, 1, Vat_class.first),
-            new Foodstuff("Salt", 5, 4000, 1, "none", Vat_class.second),
-            new Foodstuff("Fifth", 5, 5000, 1, "", Vat_class.second),
-            //new FWine("...", 13.99, 1234, Vat_class.third),
+            new Beverage("Coca Cola", 1.25M, 1, 0.5, vat.first),
+            new Beverage("Fanta", 1.25M, 2, 0.5, vat.first),
+            new Beverage("Red Bull", 1.00M, 3, 0.25, vat.first),
+            new Foodstuff("Milka Brownies", 3.00M, 4, 8, "Nuts", vat.second),
+            new Foodstuff("Cookies", 1.05M, 5, 1, "", vat.second),
+            new Foodstuff("Snickers", 1.99M, 6, 10, "Nuts", vat.second),
             };
 
-            var p_price = Vat_class.first;
-            Vat_class rate = Vat_class.first;
-            var test = Convert.ChangeType(rate, Enum.GetUnderlyingType(typeof(Vat_class)));
+            Console.WriteLine("VAT rates: \n first: 20%     second: 10%     third: 13%\n");
 
-            Console.WriteLine("Vat_rate {0} to {1}", rate, test);
-
-
-            Console.WriteLine("VAT rates: \n first: 20% \n second: 10% \n third: 13%\n");
-
-           foreach (var x in myArray)
+            foreach (var x in myArray)
             {
-                Console.WriteLine($"The price of {x} including VAT amounts to: {x.GetVATPrice(p_price)}.");
+                x.GetVATPrice();
             }
 
-            
+            string json = JsonConvert.SerializeObject(myArray, Formatting.Indented, new JsonSerializerSettings
+            {
+                TypeNameHandling = TypeNameHandling.All
+            });
+
+            Console.WriteLine("Json string:");
+            Console.WriteLine(json);
+
+
+            var data = JsonConvert.DeserializeObject<Vat[]>(json, new JsonSerializerSettings
+            {
+                TypeNameHandling = TypeNameHandling.Auto
+            });
+
+            Console.WriteLine("\n");
+
+            foreach (var x in data)
+            {
+                x.PrintName();
+            }
+
+            var water = new Beverage(1.5, 12);
+            water.GetQuantity();
+
+
         }
     }
 }
+
