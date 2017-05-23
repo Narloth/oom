@@ -47,6 +47,13 @@ namespace Task_3
 
         }
 
+        [Test]
+        public void ReturnsSameValue()
+        {
+            var x = new Beverage(0.5, 12);
+            Assert.IsTrue(x.Quantity == 12);
+        }
+
 
     }
 
