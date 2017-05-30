@@ -41,7 +41,7 @@ namespace Task_3
             get { return name; }
             set
             {
-                if (name.Equals("")) throw new ArgumentOutOfRangeException("A name has to be assigned");
+                if (value.Equals("")) throw new ArgumentOutOfRangeException("A name has to be assigned");
                 name = value;
             }
         }
@@ -81,8 +81,6 @@ namespace Task_3
         }
 
         public Product() { }
-
-        abstract public void GetQuantity();
 
     }
 
@@ -150,12 +148,6 @@ namespace Task_3
             Console.WriteLine(Name);
         }
 
-        public override void GetQuantity()
-        {
-            double total_amount = 0;
-            total_amount = Quantity * Filling_Quantity;
-            Console.WriteLine("Total amount:" + total_amount);
-        }
 
     }
 
@@ -216,12 +208,6 @@ namespace Task_3
             Console.WriteLine(Name);
         }
 
-        public override void GetQuantity()
-        {
-            double total_amount = 0;
-            total_amount += Quantity;
-            Console.WriteLine("Total amount:" + total_amount);
-        }
     }
 
 
@@ -278,8 +264,7 @@ namespace Task_3
                 x.PrintName();
             }
 
-            var water = new Beverage(1.5, 12);
-            water.GetQuantity();
+                         
 
 
         }

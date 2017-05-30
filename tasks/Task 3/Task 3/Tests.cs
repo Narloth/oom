@@ -7,6 +7,7 @@ using NUnit.Framework;
 
 namespace Task_3
 {
+    [TestFixture]
     class Tests
     {
 
@@ -54,7 +55,35 @@ namespace Task_3
             Assert.IsTrue(x.Quantity == 12);
         }
 
+        [Test]
+        public void AllValuesReturnedCorrectly()
+        {
+            var x = new Foodstuff("Nic Nacs", 1.25M, 1000, 5, "Nuts", vat.second);
+            Assert.IsTrue(x.Name == "Nic Nacs");
+            Assert.IsTrue(x.Price == 1.25M);
+            Assert.IsTrue(x.Number == 1000);
+            Assert.IsTrue(x.Quantity == 5);
+            Assert.IsTrue(x.Allergens == "Nuts");
+        }
 
+
+        [Test]
+        public void NoNegativeQuantityAllowed()
+        {
+            Assert.Catch(() =>
+            {
+                var x = new Foodstuff("Nic Nacs", 1.25M, 1000, -1, "Nuts", vat.second);
+            });
+        }
+
+        [Test]
+        public void NoNegativeQuantityAllowedEither()
+        {
+            Assert.Catch(() =>
+            {
+                var x = new Beverage("Nic Nacs", 1.25M, 1000, -1, vat.first);
+            });
+        }
     }
 
 
